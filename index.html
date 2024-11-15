@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karaoke Webpage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        #lyrics {
+            width: 80%;
+            max-width: 800px;
+            margin: 20px;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Karaoke Webpage</h1>
+    <input type="file" id="uploadMp3" accept="audio/mp3" />
+    <input type="file" id="uploadLyrics" accept=".txt" />
+
+    <div class="button-container">
+        <button id="playMp3">Play MP3</button>
+        <button id="pauseMp3">Pause MP3</button>
+        <button id="playLyrics">Karaoke Playback</button>
+        <button id="pauseLyrics">Pause Lyrics</button>
+    </div>
+
+    <div id="lyrics"></div>
+
+    <audio id="audioPlayer" controls style="display: none;"></audio>
+
+    <script>
+        const uploadMp3Input = document.getElementById('uploadMp3');
+        const uploadLyricsInput = document.getElementById('uploadLyrics');
+        const playMp3Button = document.getElementById('playMp3');
+        const pauseMp3Button = document.getElementById('pauseMp3');
+        const playLyricsButton = document.getElementById('playLyrics');
+        const pauseLyricsButton = document.getElementById('pauseLyrics');
+        const lyricsContainer = document.getElementById('lyrics');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        let lyricsArray = [];
+        let lyricsInterval;
+        let currentIndex = 0;
+
+        uploadMp3Input.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.type === 'audio/mp3') {
+                const objectURL = URL.createObjectURL(file);
+                audioPlayer.src = objectURL;
+            } else {
+                alert('Please upload a valid MP3 file.');
+            }
+        });
+
+        uploadLyricsInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    lyricsArray = e.target.result.split('\n');
+                    lyricsContainer.innerHTML = lyricsArray.join('<br>');
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please upload a valid text file with lyrics.');
+            }
+        });
+
+        playMp3Button.addEventListener('click', function() {
+            audioPlayer.play();
+        });
+
+        pauseMp3Button.addEventListener('click', function() {
+            audioPlayer.pause();
+        });
+
+        playLyricsButton.addEventListener('click', function() {
+            if (lyricsArray.length > 0) {
+                clearInterval(lyricsInterval);
+                currentIndex = 0;
+                lyricsInterval = setInterval(() => {
+                    if (currentIndex < lyricsArray.length) {
+                        lyricsContainer.innerHTML = lyricsArray.map((line, index) => {
+                            return index === currentIndex ? `<span class="highlight">${line}</span>` : line;
+                        }).join('<br>');
+                        currentIndex++;
+                    } else {
+                        clearInterval(lyricsInterval);
+                    }
+                }, 750); // 80 BPM roughly translates to 750ms per beat
+            } else {
+                alert('Please upload lyrics to start karaoke playback.');
+            }
+        });
+
+        pauseLyricsButton.addEventListener('click', function() {
+            clearInterval(lyricsInterval);
+        });
+
+        // Preload MP3 file and lyrics
+        window.onload = function() {
+            audioPlayer.src = '/mnt/data/Kem_Why_Would_You_Stay(Custom_Backing_Track)_AudioMaster.mp3';
+            const preloadedLyrics = `Er schijnt een licht op jou\nEn schat, ik begeef van binnen\nIk hield van iemand die ik amper ken\nIk moet wel gek geweest zijn\n\nOhh, ik\nIk zal je nooit meer kwetsen\nMeisje, ik\nJe verdient een betere man\nHé, ik\nWas een dwaas om je te verlaten\nDus waarom zou je blijven?\n\nLieveling, ik smeek om vergeving\nEn ik doe wat nodig is\nMoge God mijn getuige zijn\nHet was nooit mijn bedoeling je pijn te doen\n\nLief, je hart is gebroken\nMaar ik zie nog liefde in je ogen\nAls elk woord is gesproken\nZal ik je liefhebben mijn hele leven lang\n\nOhh, ik\nIk zal je nooit meer kwetsen\nMeisje, ik\nJe verdient een betere man\nHé, ik\nWas een dwaas om je te verlaten\nDus waarom zou je blijven?\n\nOh, schatje\nIk weet niet waarom je zou blijven\nBaby\nBaby\nJij bent mijn alles\nHé meisje\n\nJa, ik\nIk zal je nooit meer kwetsen\nMeisje, ik\nJe verdient een betere man\nMeisje, ik\nWas een dwaas om je te verlaten\nMaar ik wil dat je blijft\n\nMeisje, ik\nIk zal je nooit meer kwetsen\nBaby\nJe verdient een betere man\nMeisje, ik\nMeisje, ik\nWas een dwaas om je te verlaten\nMaar ik wil dat je blijft`;
+            lyricsArray = preloadedLyrics.split('\n');
+            lyricsContainer.innerHTML = lyricsArray.join('<br>');
+        };
+    </script>
+</body>
+</html>
